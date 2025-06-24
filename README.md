@@ -1,6 +1,7 @@
 # 🌐 Multilingual Translator
 
-**Multilingual Translator** is an intelligent, real-time translator built with Flask and Streamlit. It enables users to input text in one language and translate it into another, and optionally hear the translated output. This tool is ideal for seamless multilingual communication and supports over 20 global languages.
+**Multilingual Translator** a real-time multilingual translation app that allows users to type in one language and receive an instant translation in another, optionally with audio output. It supports 20+ languages and enables smooth, conversational interaction through a clean Streamlit interface. The backend is built with **Flask** and uses **OpenAI's LLMs** for high-quality translation and text-to-speech synthesis. The architecture follows an **MCP** server concept, where each task—text handling, translation, and speech generation—is treated as a modular tool. This design enables clean separation of logic, easier maintenance, and scalability for adding more tools (like summarization or Q\&A) in the future.
+
 
 ![Index](static/Index1.png)
 
