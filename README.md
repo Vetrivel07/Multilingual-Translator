@@ -1,66 +1,70 @@
 # 🌐 Multilingual Translator
 
-**Multilingual Translator** a real-time multilingual translation app that allows users to type in one language and receive an instant translation in another, optionally with audio output. It supports 20+ languages and enables smooth, conversational interaction through a clean Streamlit interface. The backend is built with **Flask** and uses **OpenAI's LLMs** for high-quality translation and text-to-speech synthesis. The architecture follows an **MCP** server concept, where each task—text handling, translation, and speech generation—is treated as a modular tool. This design enables clean separation of logic, easier maintenance, and scalability for adding more tools (like summarization or Q\&A) in the future.
+**Multilingual Translator** a real-time multilingual translation application that allows users to speak or type in one language and receive an instant translation in another, optionally with audio output. It supports 20+ languages and enables smooth, conversational interaction through a clean Streamlit interface. The backend is built with **Flask** and uses **OpenAI's LLMs** for high-quality translation and text-to-speech synthesis. 
+
+I split frontend and backend to keep roles clean and reliable: Streamlit handles UX, while Flask exposes APIs, runs model calls, and serves files. Flask is better for binary uploads and static MP3s, and it avoids Streamlit’s rerun issues during long ops. Keeping logic in Flask stabilizes state, centralizes secrets, and keeps credentials out of the UI. The same API can power other clients later. HTTP GET/POST also handles large inputs and file uploads cleanly.
 
 
 ![Index](static/Index1.png)
 
 ## 🎯 Features
 
-* 🔤 **Text-to-Text Translation**: Translate any input between major global languages using OpenAI.
-* 🗣️ **Text-to-Speech Generation**: Speak out translations in a natural voice.
-* 📲 **Real-time Interface**: Built with Streamlit for an interactive front-end experience.
-* 🌍 **Supports 20+ Languages**: Easily switch source and target languages from dropdowns.
+* 🎙️ **Voice Input (STT)**: Record from mic and auto-fill the input box on stop.
+* 🔤 **Text-to-Text Translation**: Deterministic translations between major languages.
+* 🔊 **Text-to-Speech Output**: Generate MP3 audio for the translated text.
+* 🌍 **20+ Languages**: Quick source/target selection via side-by-side dropdowns.
+* ⚡ **Real-time UI**: Immediate transcript update; mic and Translate on one line.
+* 🖥️ **Streamlit Frontend**: Clean, responsive interface.
+* 🔗 **Flask Backend API**: `/stt` for speech→text, `/translate` for text→translation+MP3, `/audio/<file>` for playback.
 
+## Model Used:
+
+1. Speech-to-Text: ```Wishper-1```
+2. Text-to-Text: ```gpt-4o-mini```
+3. Text-to-Speech: ```gpt-4o-mini-tts (voice: alloy)```
 
 ## Architecture Overview
 
 ```
-        ┌──────────────────────────────┐
-        │        Streamlit UI          │
-        │  - Text Input                │
-        │  - Language Dropdown         │
-        │  - Button: Translate & Speak │
-        └────────────┬─────────────────┘
-                     │
-                     ▼
-            User Input Triggered
-                     │
-                     ▼
-┌────────────────────────────────────────────┐
-│              Flask MCP Server              │
-│────────────────────────────────────────────│
-│ - Receives input text & user_id            │
-│ - Adds to context_store[user_id]           │
-│ - GPT translates based on history          │
-│ - Audio (mp3) is generated using OpenAI    │
-│ - Returns translated text + audio URL      │
-└────────────────────┬───────────────────────┘
-                     │
-                     ▼
-        ┌────────────────────────────┐
-        │ Streamlit Displays Output  │
-        │ - Text area for translation│
-        │ - Audio player for speech  │
-        └────────────────────────────┘
+                 ┌──────────────────────────────┐
+                 │          Streamlit UI        │
+                 │  - Textarea (key="inp")      │
+ User speaks     │  - ⏺️/⏹️ mic button         │
+ ──stop────────▶│  - Source/Target dropdowns   │
+                 │  - Translate button          │
+                 └───────┬───────────┬──────────┘
+                         │           │
+             POST /stt   │           │   GET /translate?input_text
+           (audio bytes) │           └──────────────────────────────────────────────┐
+                         │                                                          │
+                         ▼                                                          ▼
+                 ┌───────────────────┐                                   ┌─────────────────────────┐
+                 │   Flask API       │                                   │      Flask API          │
+                 │   /stt            │                                   │     /translate          │
+                 │ - Whisper STT     │                                   │ - GPT-4o-mini translate │
+                 │   → {text}        │                                   │ - gpt-4o-mini-tts MP3   │
+                 └────────┬──────────┘                                   │ - save → /audio/*.mp3   │
+                          │                                              └───────────┬─────────────┘
+                          │                                                          │
+        set st.session_state["inp"] ◀────────────── JSON { text }                   │
+                          │                                                          │
+                          ▼                                                          ▼
+                 ┌──────────────────────────────┐                       JSON { translated_text,
+                 │      Streamlit Output        │                            audio_url:/audio/… }
+                 │  - Translated textarea ◀──────────────────────────────────────────┐
+                 │  - st.audio player     ◀─────────────┐                            │
+                 └──────────────────────────────┘        │                            │
+                                                         ▼                            ▼
+                                               ┌────────────────────┐      ┌──────────────────────┐
+                                               │  Flask /audio/<id> │◀────┤ MP3 files on disk     │
+                                               │  serves audio/mpeg │      └──────────────────────┘
+                                               └────────────────────┘
+
 ```
-## 📸 Screenshot
+
+## 📸 Model Outcome
 
 ![Index](static/Index2.png)
-
-## 🔮 Future Enhancements
-
-🗣️ Improve Voice Accuracy
-Enhance speech-to-text reliability and support real-time voice streaming.
-
-🧵 Conversational Thread Memory
-Store previous translations per user for smarter context switching.
-
-🌐 Multilingual Chat Mode
-Enable live chat interface between two people speaking different languages.
-
-📱 Mobile-Friendly Interface
-Optimize Streamlit UI for small screens with mic and TTS controls.
 
 ## Author
 
