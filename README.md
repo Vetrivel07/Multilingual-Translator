@@ -1,6 +1,6 @@
 # 🌐 Multilingual Translator
 
-**Multilingual Translator** a real-time multilingual translation application that allows users to speak or type in one language and receive an instant translation in another, optionally with audio output. It supports 20+ languages and enables smooth, conversational interaction through a clean Streamlit interface. The backend is built with **Flask** and uses **OpenAI's LLMs** for high-quality translation and text-to-speech synthesis. 
+**Multilingual Translator** a real-time multilingual translation application that allows users to speak or type in one language and receive an instant translation in another, optionally with audio output. It supports 20+ languages and enables smooth, conversational interaction through a clean **Streamlit** interface. The backend is built with **Flask** and uses **OpenAI's LLMs** for high-quality translation and text-to-speech synthesis. 
 
 I split frontend and backend to keep roles clean and reliable: Streamlit handles UX, while Flask exposes APIs, runs model calls, and serves files. Flask is better for binary uploads and static MP3s, and it avoids Streamlit’s rerun issues during long ops. Keeping logic in Flask stabilizes state, centralizes secrets, and keeps credentials out of the UI. The same API can power other clients later. HTTP GET/POST also handles large inputs and file uploads cleanly.
 
